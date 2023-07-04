@@ -5,6 +5,8 @@
 static Window *s_window;
 static Layer *s_simple_bg_layer, *s_date_layer, *s_hands_layer;
 static TextLayer *s_day_label, *s_num_label;
+static BitmapLayer *s_background_layer;
+static GBitmap *s_background_bitmap;
 
 static GPath *s_tick_paths[NUM_CLOCK_TICKS];
 static GPath *s_minute_arrow, *s_hour_arrow;
@@ -80,6 +82,13 @@ static void window_load(Window *window) {
   layer_set_update_proc(s_simple_bg_layer, bg_update_proc);
   layer_add_child(window_layer, s_simple_bg_layer);
 
+  s_background_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BOLEX);
+  s_background_layer = bitmap_layer_create(bounds);
+  bitmap_layer_set_bitmap(s_background_layer, s_background_bitmap);
+  bitmap_layer_set_alignment(s_background_layer, GAlignTop);
+  bitmap_layer_set_compositing_mode(s_background_layer, GCompOpAssign);
+  layer_add_child(window_layer, bitmap_layer_get_layer(s_background_layer));
+
   s_date_layer = layer_create(bounds);
   layer_set_update_proc(s_date_layer, date_update_proc);
   layer_add_child(window_layer, s_date_layer);
@@ -117,6 +126,9 @@ static void window_unload(Window *window) {
   text_layer_destroy(s_num_label);
 
   layer_destroy(s_hands_layer);
+
+  gbitmap_destroy(s_background_bitmap);
+  bitmap_layer_destroy(s_background_layer);
 }
 
 static void init() {
